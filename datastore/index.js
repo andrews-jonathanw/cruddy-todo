@@ -25,10 +25,27 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+  // var data = _.map(items, (text, id) => {
+  //   return { id, text };
+  // });
+  // callback(null, data);
+
+  // get array of files
+  // remove counter?
+  // map to object // {id: id, text: id}
+
+  fs.readdir(exports.dataDir, (err, contents) => {
+    if (err) {
+      throw ('error listing all files');
+    } else {
+      var output = contents.map((file) => { return {id: file.substring(0, 5), text: file.substring(0, 5)}; });
+    }
+    callback(null, output);
   });
-  callback(null, data);
+
+  //callback(null, output);
+
+
 };
 
 exports.readOne = (id, callback) => {
