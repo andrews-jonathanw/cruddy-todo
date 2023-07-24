@@ -1,6 +1,6 @@
-datastore/data/*
+#datastore/data/*
 # datastore/counter.txt
-test/testData
+#test/testData
 
 ###OSX###
 
