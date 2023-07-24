@@ -30,31 +30,32 @@ exports.readAll = (callback) => {
   // });
   // callback(null, data);
 
-  // get array of files
-  // remove counter?
-  // map to object // {id: id, text: id}
-
   fs.readdir(exports.dataDir, (err, contents) => {
     if (err) {
       throw ('error listing all files');
     } else {
-      var output = contents.map((file) => { return {id: file.substring(0, 5), text: file.substring(0, 5)}; });
+      callback(null, contents.map((file) => { return {id: file.substring(0, 5), text: file.substring(0, 5)}; }));
     }
-    callback(null, output);
   });
-
-  //callback(null, output);
-
 
 };
 
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  // var text = items[id];
+  // if (!text) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback(null, { id, text });
+  // }
+  // console.log(id);
+  fs.readFile(path.join(exports.dataDir, `${id}.txt`), 'utf8', (err, text) => {
+    if (err) {
+      callback(new Error(`No item with id: ${id}`)); // ???
+    } else {
+      callback(null, {id: id, text: text});
+    }
+  });
+
 };
 
 exports.update = (id, text, callback) => {
