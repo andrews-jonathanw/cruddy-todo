@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
+const Promise = require('bluebird');
+
 
 var items = {};
 
@@ -24,21 +26,44 @@ exports.create = (text, callback) => {
   );
 };
 
+var promisifiedReaddir = Promise.promisify(require('fs').readdir);
+var promisifiedReadFile = Promise.promisify(require('fs').readFile);
 exports.readAll = (callback) => {
-  // var data = _.map(items, (text, id) => {
-  //   return { id, text };
-  // });
-  // callback(null, data);
-
-  fs.readdir(exports.dataDir, (err, contents) => {
-    if (err) {
-      throw ('error listing all files');
-    } else {
-      callback(null, contents.map((file) => { return {id: file.substring(0, 5), text: file.substring(0, 5)}; }));
-    }
-  });
-
+  return promisifiedReaddir(exports.dataDir)
+    .then((files) => {
+      var filesInDir = files.map((file) => {
+        return promisifiedReadFile(path.join(exports.dataDir, file), 'utf8')
+          .then((text) => {
+            return {file, text};
+          });
+      });
+      Promise.all(filesInDir)
+        .then((values) => {
+          // console.log('values', values);
+          callback(null, values.map( (val) => {
+            var id = val.file.substring(0, 5);
+            var text = val.text;
+            return {id: id, text: text};
+          }));
+        })
+        .catch((err) => {
+          console.log('error returning todo list', err);
+        });
+    })
+    .catch((err) => {
+      console.log('error reading files', err);
+    });
 };
+///// OLD SOLUTION ////////////////////////////////////////////////////////
+// fs.readdir(exports.dataDir, (err, contents) => {
+//   if (err) {
+//     throw ('error listing all files');
+//   } else {
+//     callback(null, contents.map((file) => {
+//       return {id: file.substring(0, 5), text: file.substring(0, 5)};
+//     }));
+//   }
+// });
 
 exports.readOne = (id, callback) => {
   // var text = items[id];
