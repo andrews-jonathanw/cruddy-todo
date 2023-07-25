@@ -59,26 +59,41 @@ exports.readOne = (id, callback) => {
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id]; 
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
-
-
+  // var item = items[id];
+  // if (!item) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   items[id] = text;
+  //   callback(null, { id, text });
+  // }
+  this.readOne(id, (err, todo) => {
+    if (todo) {
+      fs.writeFile(path.join(exports.dataDir, `${id}.txt`), text, 'utf8', (err) => {
+        callback(null, {id: id, text: text});
+      });
+    } else {
+      callback(new Error(`No item with id: ${id}`));
+    }
+  });
 };
 
 exports.delete = (id, callback) => {
-  var item = items[id];
-  delete items[id];
-  if (!item) {
-    // report an error if item not found
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback();
-  }
+  // var item = items[id];
+  // delete items[id];
+  // if (!item) {
+  //   // report an error if item not found
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback();
+  // }
+
+  fs.unlink(path.join(exports.dataDir, `${id}.txt`), (err) => {
+    if (err) {
+      callback(new Error(`No item with id: ${id}`));
+    } else {
+      callback();
+    }
+  });
 };
 
 // Config+Initialization code -- DO NOT MODIFY /////////////////////////////////
